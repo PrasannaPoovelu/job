@@ -25,6 +25,12 @@ jobs:
   # Build job
   build:
     runs-on: ubuntu-latest
+    env:
+    VITE_ADZUNA_APP_ID: ${{ secrets.VITE_ADZUNA_APP_ID }}
+    VITE_ADZUNA_APP_KEY: ${{ secrets.VITE_ADZUNA_APP_KEY }} 
+    VITE_GEMINI_API_KEY: ${{ secrets.VITE_GEMINI_API_KEY }}
+    VITE_GEMINI_MODEL: ${{ secrets.VITE_GEMINI_MODEL }} 
+    VITE_MUSE_API_KEY: ${{ secrets.VITE_MUSE_API_KEY }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
