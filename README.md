@@ -150,6 +150,42 @@ git remote add origin git@github.com:<your-username>/ai-job-application.git
 git push -u origin main
 ```
 
+## Deploy to GitHub Pages
+
+The repo ships a workflow at `.github/workflows/deploy.yml` that builds the
+app on every push to `main` and publishes `dist/` to GitHub Pages.
+
+### One-time setup
+
+1. **Enable Pages with the Actions source.** Go to your repo →
+   *Settings → Pages → Build and deployment* → set **Source = GitHub Actions**.
+2. **Add your API keys as repo secrets** (optional but recommended). Go to
+   *Settings → Secrets and variables → Actions → New repository secret* and add:
+   - `VITE_GEMINI_API_KEY` (recommended — free tier)
+   - `VITE_ADZUNA_APP_ID`, `VITE_ADZUNA_APP_KEY` (free)
+   - `VITE_JSEARCH_API_KEY` (free)
+   - Any of the others you want enabled in production.
+
+   Without these, the deployed site still loads — it just falls back to Demo Mode.
+
+### Common deployment gotchas (already handled)
+
+- **Blank screen / 404'd assets** — Vite's `base` is set to `/job/` in production
+  so asset URLs match `https://<user>.github.io/job/...`. If you fork the repo
+  under a different name, set `VITE_BASE_PATH=/new-name/` in the workflow env.
+- **Jekyll stripping `_chunks`** — `public/.nojekyll` opts out of Jekyll
+  processing so Vite's hashed chunk files survive.
+- **API keys baked into bundle** — Vite inlines `VITE_*` env vars into the JS
+  at build time. Anyone who views the deployed site can read these from the
+  bundle, so use rate-limited free keys (Gemini, Adzuna, JSearch). Never put a
+  paid Claude/Apify key in repo secrets for a public-Pages deployment — set up
+  a backend proxy instead.
+
+### Re-deploying
+
+Just push to `main` — the workflow runs automatically. To force a rebuild,
+go to *Actions → Deploy to GitHub Pages → Run workflow*.
+
 ## License
 
 Private project — all rights reserved.

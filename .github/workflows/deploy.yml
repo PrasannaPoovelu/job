@@ -1,0 +1,79 @@
+# Builds the Vite app and deploys the dist/ folder to GitHub Pages.
+# Runs on every push to main and is also dispatchable manually.
+#
+# Secrets to add (Settings → Secrets and variables → Actions → New secret):
+#   VITE_GEMINI_API_KEY      ← recommended (free tier on aistudio.google.com)
+#   VITE_ANTHROPIC_API_KEY   ← optional, paid
+#   VITE_ADZUNA_APP_ID       ← optional, job-hunter
+#   VITE_ADZUNA_APP_KEY      ← optional, job-hunter
+#   VITE_JSEARCH_API_KEY     ← optional, job-hunter (Indeed via RapidAPI)
+#   VITE_MUSE_API_KEY        ← optional, rate-limit bump
+#
+# If a secret is missing the build still succeeds — the app falls back to Demo Mode
+# and the matching job source is silently skipped.
+
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Allow only one concurrent deployment; don't cancel an in-flight one.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        env:
+          # Vite reads VITE_* env vars at build time and bakes them into the bundle.
+          VITE_GEMINI_API_KEY: ${{ secrets.VITE_GEMINI_API_KEY }}
+          VITE_GEMINI_MODEL: ${{ secrets.VITE_GEMINI_MODEL }}
+          VITE_ANTHROPIC_API_KEY: ${{ secrets.VITE_ANTHROPIC_API_KEY }}
+          VITE_ANTHROPIC_MODEL: ${{ secrets.VITE_ANTHROPIC_MODEL }}
+          VITE_ADZUNA_APP_ID: ${{ secrets.VITE_ADZUNA_APP_ID }}
+          VITE_ADZUNA_APP_KEY: ${{ secrets.VITE_ADZUNA_APP_KEY }}
+          VITE_JSEARCH_API_KEY: ${{ secrets.VITE_JSEARCH_API_KEY }}
+          VITE_MUSE_API_KEY: ${{ secrets.VITE_MUSE_API_KEY }}
+          VITE_USE_DEMO_MODE: ${{ secrets.VITE_USE_DEMO_MODE }}
+        run: npm run build
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
