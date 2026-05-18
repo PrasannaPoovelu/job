@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import type { ResumeMetrics } from '../utils/metrics';
 
 interface MetricsPanelProps {
@@ -31,9 +32,9 @@ function StatCard({
 }: {
   label: string;
   value: string;
-  sub?: React.ReactNode;
+  sub?: ReactNode;
   band?: string;
-  children?: React.ReactNode;
+  children?: ReactNode;
 }) {
   return (
     <div

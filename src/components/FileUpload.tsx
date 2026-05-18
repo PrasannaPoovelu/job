@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useRef, useState, type ChangeEvent, type DragEvent } from 'react';
 import { extractTextFromFile, isSupported } from '../utils/fileParser';
 
 interface FileUploadProps {
@@ -50,12 +50,12 @@ export function FileUpload({
     }
   }
 
-  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
+  function handleChange(e: ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (file) void handleFile(file);
   }
 
-  function handleDrop(e: React.DragEvent<HTMLDivElement>) {
+  function handleDrop(e: DragEvent<HTMLDivElement>) {
     e.preventDefault();
     setIsDragging(false);
     const file = e.dataTransfer.files?.[0];

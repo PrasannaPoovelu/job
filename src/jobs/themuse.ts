@@ -83,7 +83,7 @@ export class MuseClient {
     }
     const data = (await res.json()) as MuseResponse;
     return (data.results ?? [])
-      .map((r) => normalizeMuse(r, q.keywords))
+      .map(normalizeMuse)
       .filter((j) => j.url);
   }
 }
@@ -103,14 +103,7 @@ function stripHtml(html: string): string {
 
 function normalizeMuse(
   r: NonNullable<MuseResponse['results']>[number],
-  keywords: string,
 ): Job {
-  const lowerKw = keywords.toLowerCase().split(/\s+/).filter(Boolean);
-  const lowerTitle = (r.name ?? '').toLowerCase();
-  const matchesKeyword =
-    lowerKw.length === 0 ||
-    lowerKw.some((k) => lowerTitle.includes(k));
-
   return {
     id: `themuse:${r.id}`,
     source: 'themuse',
@@ -121,8 +114,5 @@ function normalizeMuse(
     url: r.refs?.landing_page ?? '',
     posted: r.publication_date,
     tags: r.levels?.map((l) => l.name ?? '').filter(Boolean),
-    // We DON'T filter by keyword here — caller can do that. We just leave a
-    // hint by ranking — the aggregator scores all jobs anyway.
-    remote: matchesKeyword ? undefined : undefined,
   };
 }
